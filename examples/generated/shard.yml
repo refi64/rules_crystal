@@ -1,0 +1,13 @@
+name: generated
+version: 0.1.0
+
+authors:
+  - Ryan Gonzalez <rymg19@gmail.com>
+
+targets:
+  basic:
+    main: src/generated.cr
+
+crystal: 1.0.0
+
+license: MIT

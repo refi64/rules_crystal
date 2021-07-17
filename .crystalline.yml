@@ -1,0 +1,5 @@
+projects:
+  - docs/generator
+  - examples/basic
+  - examples/generated
+  - examples/kemal

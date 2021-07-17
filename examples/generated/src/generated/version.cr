@@ -1,0 +1,1 @@
+../../bazel-bin/_generated_srcs/src/generated/version.cr

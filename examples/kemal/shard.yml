@@ -1,0 +1,24 @@
+name: kemal_demo
+version: 0.1.0
+
+authors:
+  - Ryan Gonzalez <rymg19@gmail.com>
+
+targets:
+  kemal_demo:
+    main: src/kemal_demo.cr
+
+dependencies:
+  kemal:
+    github: kemalcr/kemal
+    version: 1.0.0
+  spec-kemal:
+    github: kemalcr/spec-kemal
+    version: 1.0.0
+
+crystalline:
+  main: .crystalline_main.cr
+
+crystal: 1.0.0
+
+license: MIT
