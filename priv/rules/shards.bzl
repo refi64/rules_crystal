@@ -1,11 +1,19 @@
 """Contains rules for installing a WORKSPACE from shards packages."""
 
+# XXX: We probably want some way of setting source dirs per-shard, instead of hardcoding
+# "tasks" here for Lucky.
 _LIBRARY_RULE_TEMPLATE = """
 crystal_library(
     name = "{shard}",
-    srcs = glob(["lib/{shard}/src/**/*.cr"]),
+    srcs = glob([
+        "lib/{shard}/src/**/*.cr",
+        "lib/{shard}/tasks/**/*.cr",
+    ]),
     extra_srcs = glob(
-        ["lib/{shard}/src/**/*"],
+        [
+            "lib/{shard}/src/**/*",
+            "lib/{shard}/tasks/**/*",
+        ],
         exclude = ["**/*.cr"],
     ),
     remove_require_prefix = "lib/{shard}",
