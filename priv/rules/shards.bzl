@@ -99,8 +99,14 @@ def _shards_install_impl(repository_ctx):
     shard_yml = repository_ctx.path(repository_ctx.attr.shard_yml)
     shard_lock = repository_ctx.path(repository_ctx.attr.shard_lock)
 
+    shard_override = None
+    if repository_ctx.attr.shard_override:
+        shard_override = repository_ctx.path(repository_ctx.attr.shard_override)
+
     repository_ctx.symlink(shard_yml, "shard.yml")
     repository_ctx.symlink(shard_lock, "shard.lock")
+    if shard_override:
+        repository_ctx.symlink(shard_override, "shard.override.yml")
 
     repository_ctx.symlink(shard_yml.dirname.get_child("lib"), "lib")
 
@@ -120,6 +126,7 @@ shards_install = repository_rule(
         "shards": attr.label(),
         "shard_yml": attr.label(allow_single_file = [".yml"], mandatory = True),
         "shard_lock": attr.label(allow_single_file = [".lock"], mandatory = True),
+        "shard_override": attr.label(allow_single_file = [".yml"]),
         "development": attr.bool(default = True),
     },
 )
