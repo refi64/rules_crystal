@@ -1,3 +1,5 @@
 .vscode/
+examples/*/bin
 examples/*/lib
+examples/*/.env
 bazel-*

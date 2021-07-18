@@ -1,0 +1,25 @@
+name: lucky_api
+version: 0.1.0
+
+authors:
+  - Ryan Gonzalez <rymg19@gmail.com>
+
+targets:
+  lucky_api:
+    main: src/lucky_api.cr
+
+crystalline:
+  main: .crystalline_main.cr
+
+crystal: 1.1.0
+
+dependencies:
+  lucky:
+    github: luckyframework/lucky
+    version: ~> 0.27.0
+  lucky_env:
+    github: luckyframework/lucky_env
+    version: ~> 0.1.2
+  lucky_task:
+    github: luckyframework/lucky_task
+    version: ~> 0.1.0

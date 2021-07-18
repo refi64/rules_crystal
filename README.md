@@ -136,6 +136,8 @@ The following examples are available:
   Notice that a symlink was created in the source tree at the location of the generated
   file so that autocomplete works.
 - [`kemal`](examples/kemal): Uses the Kemal shard, showcasing `shards` integration.
+- [`lucky_api`](examples/lucky_api): A Lucky API server, showcasing some more complex
+  code with rules_crystal.
 
 ## Notable gotchas
 

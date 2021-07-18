@@ -1,0 +1,20 @@
+workspace(
+    name = "lucky_api",
+    managed_directories = {"@shards": ["lib"]},
+)
+
+local_repository(
+    name = "rules_crystal",
+    path = "../..",
+)
+
+load("@rules_crystal//:index.bzl", "crystal_repositories", "shards_install")
+
+crystal_repositories(name = "crystal")
+
+shards_install(
+    name = "shards",
+    shard_lock = "//:shard.lock",
+    shard_override = "//:shard.override.yml",
+    shard_yml = "//:shard.yml",
+)

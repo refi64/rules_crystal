@@ -1,0 +1,4 @@
+dependencies:
+  lucky:
+    github: luckyframework/lucky
+    commit: 9494603dd74e7a87109021f60de0e56bd533e507
