@@ -32,6 +32,14 @@ _BINARY_ATTRS = dict(BINARY_LIBRARY_ATTRS, **_BINARY_ADDITIONAL_ATTRS)
 def _root_sources_hidden_prefix(ctx, srcs, extra_srcs):
     return root_sources(ctx, srcs, extra_srcs, prefix = "_%s_srcs" % ctx.label.name)
 
+def _merge_extra_srcs_and_deps_with_base(extra_srcs, deps, base):
+    base_sources_info = base[CrystalSourcesInfo]
+    base_srcs = list(base_sources_info.srcs)
+    if base_sources_info.main_src_index != -1:
+        base_srcs.pop(base_sources_info.main_src_index)
+
+    return extra_srcs + base_srcs, deps + base_sources_info.deps
+
 def _compile(ctx, root_info, compile_entry_points, deps):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
@@ -94,19 +102,29 @@ def _crystal_binary_impl(ctx):
 
     main_src_index = ctx.files.srcs.index(ctx.file.main)
 
-    root_info = _root_sources_hidden_prefix(ctx, ctx.attr.srcs, ctx.attr.extra_srcs)
+    extra_srcs = ctx.attr.extra_srcs
+    deps = ctx.attr.deps
+
+    if ctx.attr.based_on:
+        extra_srcs, deps = _merge_extra_srcs_and_deps_with_base(
+            extra_srcs,
+            deps,
+            ctx.attr.based_on,
+        )
+
+    root_info = _root_sources_hidden_prefix(ctx, ctx.attr.srcs, extra_srcs)
     compile_info = _compile(
         ctx,
         root_info = root_info,
         compile_entry_points = [root_info.src_links[main_src_index]],
-        deps = ctx.attr.deps,
+        deps = deps,
     )
 
     return [
         compile_info.default_info,
         CrystalSourcesInfo(
-            srcs = ctx.attr.srcs + ctx.attr.extra_srcs,
-            deps = ctx.attr.deps,
+            srcs = ctx.attr.srcs + extra_srcs,
+            deps = deps,
             main_src_index = main_src_index,
         ),
     ]
@@ -116,16 +134,11 @@ def _crystal_test_impl(ctx):
     deps = ctx.attr.deps
 
     if ctx.attr.subject:
-        extra_srcs = list(extra_srcs)
-        deps = list(deps)
-
-        subject_sources_info = ctx.attr.subject[CrystalSourcesInfo]
-        subject_srcs = list(subject_sources_info.srcs)
-        if subject_sources_info.main_src_index != -1:
-            subject_srcs.pop(subject_sources_info.main_src_index)
-
-        extra_srcs.extend(subject_srcs)
-        deps.extend(subject_sources_info.deps)
+        extra_srcs, deps = _merge_extra_srcs_and_deps_with_base(
+            extra_srcs,
+            deps,
+            ctx.attr.subject,
+        )
 
     root_info = _root_sources_hidden_prefix(ctx, ctx.attr.srcs, extra_srcs)
     compile_info = _compile(
@@ -157,6 +170,10 @@ crystal_binary = _create_binary_rule(
             allow_single_file = [".cr"],
             doc = "The main entry point for the program.",
             mandatory = True,
+        ),
+        "based_on": attr.label(
+            providers = [CrystalSourcesInfo],
+            doc = "A binary or library to re-use srcs and deps from.",
         ),
     },
 )
