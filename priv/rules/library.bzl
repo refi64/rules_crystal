@@ -6,6 +6,7 @@ load(
     "CrystalLibraryInfo",
     "CrystalSourcesInfo",
     "depset_for_libraries",
+    "merge_runfiles",
 )
 load("//:priv/utils/sources.bzl", "root_sources")
 
@@ -44,7 +45,13 @@ def _crystal_library_impl(ctx):
             deps = deps,
             main_src_index = -1,
         ),
-        DefaultInfo(files = depset(links)),
+        DefaultInfo(
+            files = depset(links),
+            runfiles = merge_runfiles(
+                ctx,
+                ctx.attr.srcs + ctx.attr.extra_srcs + ctx.attr.deps,
+            ),
+        ),
     ]
 
 crystal_library = rule(

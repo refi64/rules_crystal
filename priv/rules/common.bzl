@@ -39,6 +39,11 @@ BINARY_LIBRARY_ATTRS = {
         providers = [CrystalLibraryInfo],
         doc = "Crystal libraries that this target depends on.",
     ),
+    "data": attr.label_list(
+        allow_files = True,
+        doc = """Files needed by this rule at runtime. Equivalent to `cc_binary`'s \
+and `cc_library`'s *data*.""",
+    ),
 }
 
 def get_libraries_for_targets(targets):
@@ -51,3 +56,9 @@ def depset_for_libraries(lib_targets):
         lib_targets,
         transitive = [lib.deps for lib in get_libraries_for_targets(lib_targets)],
     )
+
+def merge_runfiles(ctx, deps):
+    runfiles = ctx.runfiles(files = ctx.files.data)
+    for dep in deps:
+        runfiles = runfiles.merge(dep[DefaultInfo].default_runfiles)
+    return runfiles

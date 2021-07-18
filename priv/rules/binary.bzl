@@ -6,6 +6,7 @@ load(
     "CrystalLibraryInfo",
     "CrystalSourcesInfo",
     "depset_for_libraries",
+    "merge_runfiles",
 )
 load("//:priv/utils/sources.bzl", "root_sources")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "CPP_LINK_EXECUTABLE_ACTION_NAME")
@@ -40,7 +41,7 @@ def _merge_extra_srcs_and_deps_with_base(extra_srcs, deps, base):
 
     return extra_srcs + base_srcs, deps + base_sources_info.deps
 
-def _compile(ctx, root_info, compile_entry_points, deps):
+def _compile(ctx, root_info, compile_entry_points, runfiles, deps):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
@@ -92,7 +93,11 @@ def _compile(ctx, root_info, compile_entry_points, deps):
     )
 
     return _CompileInfo(
-        default_info = DefaultInfo(files = depset([output]), executable = output),
+        default_info = DefaultInfo(
+            files = depset([output]),
+            executable = output,
+            runfiles = runfiles,
+        ),
         libs_depset = libs_depset,
     )
 
@@ -104,6 +109,7 @@ def _crystal_binary_impl(ctx):
 
     extra_srcs = ctx.attr.extra_srcs
     deps = ctx.attr.deps
+    runfiles_extra_deps = []
 
     if ctx.attr.based_on:
         extra_srcs, deps = _merge_extra_srcs_and_deps_with_base(
@@ -111,12 +117,18 @@ def _crystal_binary_impl(ctx):
             deps,
             ctx.attr.based_on,
         )
+        runfiles_extra_deps.append(ctx.attr.based_on)
 
+    runfiles = merge_runfiles(
+        ctx,
+        ctx.attr.srcs + extra_srcs + deps + runfiles_extra_deps,
+    )
     root_info = _root_sources_hidden_prefix(ctx, ctx.attr.srcs, extra_srcs)
     compile_info = _compile(
         ctx,
         root_info = root_info,
         compile_entry_points = [root_info.src_links[main_src_index]],
+        runfiles = runfiles,
         deps = deps,
     )
 
@@ -132,6 +144,7 @@ def _crystal_binary_impl(ctx):
 def _crystal_test_impl(ctx):
     extra_srcs = ctx.attr.extra_srcs
     deps = ctx.attr.deps
+    runfiles_extra_deps = []
 
     if ctx.attr.subject:
         extra_srcs, deps = _merge_extra_srcs_and_deps_with_base(
@@ -139,12 +152,18 @@ def _crystal_test_impl(ctx):
             deps,
             ctx.attr.subject,
         )
+        runfiles_extra_deps.append(ctx.attr.subject)
 
     root_info = _root_sources_hidden_prefix(ctx, ctx.attr.srcs, extra_srcs)
+    runfiles = merge_runfiles(
+        ctx,
+        ctx.attr.srcs + extra_srcs + deps + runfiles_extra_deps,
+    )
     compile_info = _compile(
         ctx,
         root_info = root_info,
         compile_entry_points = root_info.src_links,
+        runfiles = runfiles,
         deps = deps,
     )
 
