@@ -137,6 +137,23 @@ The following examples are available:
   file so that autocomplete works.
 - [`kemal`](examples/kemal): Uses the Kemal shard, showcasing `shards` integration.
 
+## Notable gotchas
+
+### Empty directories
+
+Normally, this code is valid if `dir` is empty, as long as it is present:
+
+```crystal
+require './dir/**'
+```
+
+However, in the Bazel sandbox, empty directories will not be preserved, so this will be an
+error.
+
+A workaround is to have `.keep` files inside the directory, then use those in
+`extra_srcs`, which will ensure the directories have at least one file and thus are kept
+in the sandbox.
+
 ## Major TODOs
 
 - Rendered documentation
